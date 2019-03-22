@@ -1,0 +1,445 @@
+<div>
+    <div Id="nav-bar">
+        <div class="top-image-navbar-block">
+            <nav class="navbar navbar-expand-md navbar-dark" style="background-color: rgb(57, 123, 247)">
+                <a>
+                    <img class="navbar-brand img-fluid tssg-logo" src="Images/Logo_TSSG.png" alt="Image not avaiable"
+                        onClick="setContent(homeContent)">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#myNavbar"
+                    aria-controls="myNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="myNavbar">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(homeContent)">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(calendarContent)">Schedule</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(webContent)">WEB</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(mobileContent)">MOBILE</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(qualityContent)">QA</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(dataContent)">DATA</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(devOpsContent)">DEVOPS</a>
+                        </li>
+<!-- The following elements can be enabled to test an extremely wide/long bootstrap menu
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(homeContent)">TEST</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(homeContent)">TEST</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(homeContent)">TEST</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(homeContent)">TEST</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(homeContent)">TEST</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="setContent(homeContent)">TEST</a>
+                        </li>
+end of bootstrap menu test -->                        
+<!--
+                        The following two menu items are debugging aids.  They are normally 
+                        commented out but can be enabled by removing the block comment tokens 
+                        surrounding the two anchor declarations.  Both commands can be enabled 
+                        together or separately.  The Toggle-Phone command toggles the isPhone 
+                        variable and calls debug-page to display the isPhone state along with 
+                        other information.  Setting the isPhone variable to true forces the 
+                        application to run as it would on a small screen device.  The Debug 
+                        command displays a page with various debugging information.
+-->                        
+<!--                         <li class="nav-item">
+                            <a class="nav-link" onClick="toggleIsPhone()">Toggle-Phone</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onClick="debugStuff()">Debug</a>
+                        </li>
+ -->                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="d-flex flex-row row" style="margin: 4px 0 4px 0">
+            <div id="carouselContainer" class="col-sm-12 align-self-center">
+                <div id="Slide" class="container-fluid text-center" style="max-width: 600px;">
+                    <!-- bg-ltblue -->
+                    <div id="myCarousel" class="carousel slide text-center" data-ride="carousel">
+                        <div class="carousel-indicators">
+                        </div>
+                        <!-- Wrapper for slides -->
+                        <div class="carousel-inner text-center" role="listbox" style="line-height: 40px;">
+                            <div class="carousel-item active">
+                                <p class="car-text"> we develop web and mobile applications </p>
+                            </div>
+                            <div class="carousel-item">
+                                <p class="car-text"> we perform software quality assurance </p>
+                            </div>
+                            <div class="carousel-item">
+                                <p class="car-text"> we perform data analytics </p>
+                            </div>
+                            <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--footer id must match the leading portion of a content id-->
+    <footer id="footer">
+        <!-- home icon is no longer being used in the footer
+        <img id="home" src="images/icon_home.png" onclick="setContent(homeContent)" /> -->
+        <img id="web" src="images/icon_web.png" onclick="setContent(webContent)" />
+        <img id="mobile" src="images/icon_mobile.png" onclick="setContent(mobileContent)" />
+        <img id="quality" src="images/icon_quality.png" onclick="setContent(qualityContent)" />
+        <img id="data" src="images/icon_data.png" onclick="setContent(dataContent)" />
+        <img id="devOps" src="images/icon_devops.png" onclick="setContent(devOpsContent)" />
+        <!-- calander icon is no longer being used in the footer
+        <img id="calendar" src="images/icon-calendar5.png" onclick="setContent(scheduleContent)" /> -->
+    </footer>
+    <!--content id must be hyphenated.  Leading portion must match a footer icon id-->
+    <div id="mobile-group" class="content">
+        <section id="subMobileId" class="container-fluid text-left group-section" role="navigation">
+            <h1>THE MOBILE APPLICATION DEVELOPMENT TEAM</h1>
+            <p>Tue 10 to 1pm, Acton Library and Online, Team Lead: Mark Pralat</p>
+            <p>As mobile application development professionals we develop applications using current technologies. The
+                group currently
+                focuses on Android development and welcomes other mobile technologies. All are welcome if they have an
+                interest in
+                mobile development, from inception to release and beyond.
+            </p>
+            <p>Project management using Agile/Scrum, and Kanban methods.</p>
+            <h2>Projects:</h2>
+            <ul>
+                <li>EventBoss &dash; RSS Feed Reader</li>
+                <li>SleepAnalyzer &dash; EEG Brain Wave Monitor using a Muse headband</li>
+            </ul>
+            <h2>Technologies:</h2>
+            <ul>
+                <li>Android Studio</li>
+                <li>Agile/Scrum, Kanban</li>
+                <li>Android OS, Java, XML</li>
+                <li>Android Architecture Components, Constraint Layout, Material Design</li>
+                <li>Gradle</li>
+                <li>Jira</li>
+                <li>Git, GitHub, Subversion (SVN)</li>
+                <li>Appium, Selenium</li>
+                <li>Coming soon: Kotlin, Espresso, JUnit, Android Things (IoT)</li>
+                <li>Eclipse (replaced by Android Studio)</li>
+                <li>SeeNowDo: retired</li>
+            </ul>
+            <h2><strong>Past Projects:</strong></h2>
+            <ul>
+                <li>Mobile Robot (individual project) using MIT App Inventor</li>
+            </ul>
+        </section>
+    </div>
+    <div id="data-group" class="content">
+        <section id="subDataId" class="container-fluid text-left group-section" role="navigation">
+            <h1>THE DATA ANALYTICS DEVELOPMENT TEAM</h1>
+            <p>Fri 1 to 3pm, Acton Library and Online, Team Lead: Norm Heckman</p>
+            <h2>Technologies:</h2>
+            <ul>
+                <li>Project Management using Agile/Scrum model. </li>
+                <li>Jupyter Notebook</li>
+                <li>TensorFlow</li>
+                <li>Keras</li>
+                <li>Python</li>
+                <li>R</li>
+                <li>nVidia CUDA Toolkit</li>
+                <li>Spark</li>
+                <li>Convolutional Neural Networks (CNN)</li>
+                <li>Kaggle</li>
+            </ul>
+        </section>
+    </div>
+    <div id="devOps-group" class="content">
+        <section id="subDevopsId" class="container-fluid text-left group-section" role="navigation">
+            <h1>THE DEVOPS TEAM</h1>
+            <p>Fri 7 to 9pm, Online, Team Lead: Ralph Navarro</p>
+            <p>Each project team within TSSG tries to learn new technology. The DevOps Team helps each of the teams by
+                installing,
+                administrating, and maintaining tools and services that make the groups more productive. We also
+                address backups, restores,
+                updates, migrations, and system upgrades. All services are made available on technologynursery.org.
+            </p>
+            <h2>Projects:</h2>
+            <ul>
+                <li>Web Team infrastructure for building, deploying, testing web sites.</li>
+                <li>Data Analytics Team tools for running and sharing machine learning neural network environments.</li>
+                <li>Mobile Team project management tools.</li>
+            </ul>
+            <h2>Technologies:</h2>
+            <ul>
+                <li><strong>Jira</strong> - Project management</li>
+                <li><strong>Xray for Jira</strong> - Test Management plugin that leverages Behavior Driven Development</li>
+                <li><strong>Confluence</strong> - Knowledge management</li>
+                <li><strong>PostgreSQL</strong> - Database used by Jira and Confluence</li>
+                <li><strong>Selenium Grid</strong> - Firefox and Chrome nodes available for use by automated testing</li>
+                <li><strong>Jenkins</strong> - Continuous Integration / Continuous Deployment</li>
+                <li><strong>Git Server</strong> - Private git server</li>
+                <li><strong>Docker</strong> - Containerization which makes all of these services possible on minimal
+                    servers</li>
+                <li><strong>Docker Compose</strong> - Multiple container configuration and deployment</li>
+                <li><strong>Jupyter Notebooks</strong> - Sharing documents that contain and execute machine learning
+                    code</li>
+                <li><strong>nVidia CUDA Toolkit</strong> - Graphical Processing Unit libraries for creating neural
+                    networks</li>
+                <li><strong>TensorFlow</strong> - Library for machine learning</li>
+                <li><strong>Keras</strong> - Library to simplify machine learning</li>
+                <li><strong>Grafana</strong> - Dashboard for monitoring system resources</li>
+                <li><strong>Prometheus</strong> - Round-robin database for storing performance metrics</li>
+                <li><strong>Node Explorer</strong> - System node metrics collector</li>
+                <li><strong>cAdvisor</strong> - Container metrics collector</li>
+                <li><strong>Geb</strong> - Groovy DSL to simplify Selenium test automation coding</li>
+                <li><strong>Spock Framework</strong> - Behavior Driven Development specification framework. A more
+                    logical way to write specifications</li>
+                <li><strong>Groovy</strong> - Simplifying the manipulation of Java libraries</li>
+                <li><strong>Java</strong> - Oracle's general purpose programming language</li>
+                <li><strong>NodeJS</strong> - Asynchronous web service</li>
+            </ul>
+        </section>
+    </div>
+    <div id="quality-group" class="content">
+        <section id="subQaId" class="container-fluid text-left group-section" role="navigation">
+            <h1>THE QUALITY ASSURANCE STUDY AND DISCUSSION GROUP</h1>
+            <p>Thu 10 to Noon, Online, Team Lead: Ray Bloom</p>
+            <p>As Quality Assurance (QA) professionals, we explore and learn current technologies within various
+                platforms to expand
+                our skill sets. We help investigate QA issues encountered by study group members. Any member of TSSG
+                with an interest
+                in QA is welcome to participate.
+            </p>
+
+            <h2>Technologies:</h2>
+            <ul>
+                <li>Selenium, Appium</li>
+                <li>Java, Python</li>
+                <li>Junit, TestNG, PyUnit (&OpenCurlyDoubleQuote;unit test&CloseCurlyDoubleQuote;)</li>
+                <li>Maven, Gradle</li>
+                <li>Jenkins Continuous Integration Server</li>
+                <li>Docker, Azure, AWS, VirtualBox, other approaches to virtualization</li>
+                <li>Cucumber, Geb, Spock, Behavior Driven Development (BDD)</li>
+            </ul>
+        </section>
+    </div>
+    <div id="web-group" class="content">
+        <section id="subWebId" class="container-fluid text-left group-section" role="navigation">
+            <h1>THE WEBSITE APPLICATION DEVELOPMENT TEAM</h1>
+            <p>Mon 1:30 to 3:30pm, Online, Team Lead: Jim Turner</p>
+            <p>As web professionals we develop web applications using current technologies to learn and explore. We
+                have found that
+                active involvement in projects enhances our members&CloseCurlyQuote; opportunities for new roles or
+                new challenges. All are welcome
+                if they have an interest in Web Application Development.
+            </p>
+            <h2>Projects:</h2>
+
+            <p>Musicians Manager</p>
+            <ul>
+                <li>LARAVEL &dash; Experimental version</li>
+                <li>PHP &dash; Live version with a real-world customer</li>
+                <li>MEAN Stack &dash; Experimental version</li>
+            </ul>
+            <p>TSSG.TECH website development</p>
+            <h2>Technologies:</h2>
+            <ul>
+                <li>Agile model using CA Rally / CA Central Project Management</li>
+                <li>Subversion (SVN) and GitHub source code repositories</li>
+                <li>LARAVEL (PHP framework)</li>
+                <li>Bootstrap</li>
+                <li>JQuery</li>
+                <li>PHP</li>
+                <li>MySQL db</li>
+                <li>JavaScript</li>
+                <li>HTML5</li>
+                <li>CSS3</li>
+                <li>MEAN Stack (MongoDB, Express, Angular, Node.js)</li>
+                <li>Jenkins (Continuous Integration)</li>
+                <li>Selenium &amp; Selenium Grid test automation</li>
+                <li>Cucumber/Behavior Driven Development (BDD)</li>
+                <li>User Experience Design</li>
+                <li>Responsive Design</li>
+            </ul>
+        </section>
+    </div>
+    <div id="home-page" class="content">
+        <section id="subMeetingId" class="container-fluid group-section" role="navigation">
+            <!--hr-->
+            <h1>GENERAL MEETING INFORMATION</h1>
+            <br>
+            <div class="row">
+                <div class="col-9">
+                    <p>The TSSG General Meeting is on Wednesdays. It is an all-team meeting for introductions,
+                        updates and discussions</p>
+                    <p> Before joining, you must attend, in-person, one TSSG general meeting.
+                        <span class="">Please note that the group generally meets in the Eastern Massachusetts
+                            area.</span>
+                    </p>
+                </div>
+                <div class="col-3">
+                    <!-- Either href="#" class="calendar-page" or remove the following anchor element-->
+                    <a href="#" class="calendar-page"></a>
+                        <img class="img-fluid schedule-1" src="images/icon-calendar5.png" alt="Schedule" data-toggle="tooltip"
+                            title="Wednesday Weekly Meeting Schedule" onClick="setContent(calendarContent)">
+                    </a>
+                </div>
+            </div> <!-- row -->
+            <p>Wednesday 12:30 to 5pm, Please check the schedule, General Manager: Andy Leuper</p>
+            <ul>
+                <li>Anyone interested in any aspect of the software development life cycle is welcome to attend
+                </li>
+                <li>Developers, web designers, project managers, support persons and those interested in learning
+                    about these and other
+                    roles are welcome</li>
+                <li>If you are not sure where you may fit in, we will help you to figure it out</li>
+            </ul>
+            <p>Sample Wednesday Agenda</p>
+            <ul>
+                <li>12:30 to 1:00 pm: <strong>Intros, Announcements and recruiting updates</strong></li>
+                <li>1:00 to 2:10 pm: <strong>Web Application Project (PHP, JavaScript, HTML5)</strong>
+                    <ul>
+                        <li>Scrum</li>
+                        <li>Program or Technology review</li>
+                        <li>Review, Analyze and Update user stories</li>
+                    </ul>
+                </li>
+                <li>2:10 to 2:20 pm: <strong>Break</strong></li>
+                <li>2:20 to 3:30 pm: <strong>Mobile Application Project (Java, Android)</strong>
+                    <ul>
+                        <li>Scrum</li>
+                        <li>Program or Technology review</li>
+                        <li>Review, Analyze and Update user stories</li>
+                    </ul>
+                </li>
+                <li>3:30 to 3:40 pm: <strong>Break</strong></li>
+                <li>3:40 to 5:00 pm: <strong>Data Analytics Project (Python, R, Hadoop)</strong>
+                    <ul>
+                        <li>Scrum</li>
+                        <li>Program or Technology review</li>
+                        <li>Review, Analyze and Update user stories</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+    </div>
+    <div id="calendar-page" class="content">
+        <!--table align="center" border="2" cellpadding="2" cellspacing="2" style="width: 400px;" summary="Update Dates, Locations and Meeting Times"-->
+        <table border="2" cellpadding="2" cellspacing="2" style="float: center" summary="Update Dates, Locations and Meeting Times">
+            <thead>
+                <tr>
+                    <th bgcolor="black" scope="col"></th>
+                    <th bgcolor="black" scope="col">
+                        <span style="font-size:22px;">
+                            <span style="font-family:arial,helvetica,sans-serif;" style="text-align: center;">
+                                <strong>
+                                    <font color="#ffffff">WEDNESDAY</font>
+                                </strong>
+                            </span>
+                        </span>
+                    </th>
+                    <th bgcolor="black" scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <!-- Icon for Acton Library -->
+                    <td style="text-align: center;"><span style="font-family:arial;">SEP</span><br />
+                        <span style="font-size:48px;">
+                            <font face="arial">12</font>
+                        </span><br />
+                        <span style="font-family:arial;">2018</span></td>
+                    <td style="text-align: center;"><a id="schedule" href="https://goo.gl/maps/6wmSZBydHVU2">
+                            <img alt="Acton Memorial Library" src="ScheduleIcons/icon-lib-acton.png" style="height: 100px; width: 154px;" /></a></td>
+                    <td style="text-align: center;">
+                        <p>
+                            <font face="arial">12:30<br />
+                                to<br />
+                                5pm</font>
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <!-- Icon for Acton Library -->
+                    <td style="text-align: center;"><span style="font-family:arial;">SEP</span><br />
+                        <span style="font-size:48px;">
+                            <font face="arial">19</font>
+                        </span><br />
+                        <span style="font-family:arial;">2018</span></td>
+                    <td style="text-align: center;"><a id="schedule" href="https://goo.gl/maps/6wmSZBydHVU2">
+                            <img alt="Acton Memorial Library" src="ScheduleIcons/icon-lib-acton.png" style="height: 100px; width: 154px;" /></a></td>
+                    <td style="text-align: center;">
+                        <p>
+                            <font face="arial">12:30<br />
+                                to<br />
+                                5pm</font>
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <!-- Icon for Chelmsford Library -->
+                    <td style="text-align: center;"><span style="font-family:arial;">SEP</span><br />
+                        <span style="font-size:48px;">
+                            <font face="arial">26</font>
+                        </span><br />
+                        <span style="font-family:arial;">2018</span></td>
+                    <td style="text-align: center;"><a id="schedule" href="https://goo.gl/maps/5r8hpPRyd4n">
+                            <img alt="" src="ScheduleIcons/icon-lib-chelmsford.png" style="width: 154px; height: 100px;" /></a></td>
+                    <td style="text-align: center;">
+                        <p>
+                            <font face="arial">12:30<br />
+                                to<br />
+                                5pm</font>
+                        </p>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    <div id="debug-page" class="content">
+        <section id="subMeetingId" class="container-fluid group-section" role="navigation">
+            <p id="demov"></p>
+            <p id="demoa"></p>
+            <p id="demop"></p>
+            <p id="demol"></p>
+            <p id="demows"></p>
+            <p id="demow"></p>
+            <p id="demoh"></p>
+            <p id="demoaw"></p>
+            <p id="demoah"></p>
+            <p id="isphone"></p>
+            <p id="isportriat"></p>
+            <p id="islandscape"></p>
+            <p id="dispfooter"></p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+        </section>
+    </div>
+    <div id="empty-placeHolder">
+    </div>
+</div>

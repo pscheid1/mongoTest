@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Technical Skills Share Group (TSSG)</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+    <link rel="stylesheet" type="text/css" href="styles/tssgStyle.css">
+    <link rel="import" href="imports/tssgPageTemplate.html">
+
+    <script language="javascript">
+
+        "use strict";
+
+        // Because these variables are not declared in a function, their
+        // scope is global.
+
+        // The following debug variables can be used to enable/disable 
+        // embedded console.log messages.
+        // enable/disable console.log messages indicating code path
+        var debugTrace = false;
+        // enable/disable console.log messages containing data
+        var debugData = false;
+
+        if (debugTrace) console.log("page initialization");
+
+        var calledFromListener = false;
+        var calledFromSetContent = false;
+        var htmlDoc;
+        var navbarElement;
+        var footerElement;
+        var homeContent;
+        var mobileContent;
+        var dataContent;
+        var devOpsContent;
+        var qualityContent;
+        var webContent;
+        var calendarContent;
+        var currentContent;
+        var newContent;
+        var debugPage;
+        var emptyPlaceHolder;
+        var carousel;
+        var displayFooter = true;
+
+        // abitrary but seems to fit current definition 
+        // this is based on screen size which will remain constant
+        var isPhone = (screen.availWidth < 900 && screen.availHeight < 900);
+
+        // the winResize() function will get called each time the view port changes
+        // if the device is a phone and display mode is landscape, the footer is removed if
+        // required.  Otherwise if it is a phone in portriat mode, the footer is appended if
+        // required.  if the device is not a phone and footer is not currently displayed,
+        // it will be added back in.  
+        // the carousel is deleted and added back in parallel with the footer action.
+
+        function winResize() {
+            if (isPhone) {
+                if (modeIsLandscape()) {
+                    if (displayFooter) {
+                        // footer is displayed.  Remove it
+                        var element = document.getElementById("footer");
+                        element.parentNode.removeChild(element);
+                        // replace the carousel with an empty place holder
+                        carousel = document.getElementById("carouselContainer");
+                        carousel.replaceWith(emptyPlaceHolder);
+                        displayFooter = false;
+                    }
+                    else {
+                        // footer currently not displayed.  Exit
+                    }
+                } else {
+                    // phone is in portriat mode
+                    if (!displayFooter) {
+                        // portriat mode and footer is not displayed.  Display it
+                        // footer is always on the bottom, so just append it
+                        document.body.appendChild(footerElement.cloneNode(true));
+                        // replace the empty place holder with the carousel
+                        var element = document.getElementById("empty-placeHolder");
+                        element.replaceWith(carousel);
+
+                        displayFooter = true;
+                    }
+                    else {
+                        // footer currently displayed.  Exit
+                    }
+                }
+                return;
+            } else {
+                if (!displayFooter) {
+                    // not a phone and footer is not displayed.  Display it
+                    // footer is always on the bottom, so just append it
+                    document.body.appendChild(footerElement.cloneNode(true));
+                    // replace the empty place holder with the carousel
+                    var element = document.getElementById("empty-placeHolder");
+                    element.replaceWith(carousel);
+
+                    displayFooter = true;
+                }
+            }
+        }
+
+        // this funciton will replace the currently displayed content 
+        // with the requested new content.  If the requested content is 
+        // not home, calendar, and debug, it will add the selected class
+        // to the new content and remove it from the old content.
+        function setContent(newContent) {
+            if (debugData) console.log("newContent: " + newContent.innerHTML);
+            var oldContent = document.getElementById(currentContent.id);
+            //console.log("newContent.id: "   + newContent.id);
+            var rslt = (newContent.id === "calendar-page");
+            document.body.replaceChild(newContent, oldContent);
+            if (debugData) console.log("newContent: " + newContent.id + " - " + "oldContent: " + oldContent.id);
+            if (displayFooter) {
+                var iconId = getIconId(oldContent);
+                // home and calendar icons are no longer being used in the footer
+                if (iconId.length > 0) {
+                    switch (iconId) {
+                        case "home":
+                        case "calendar":
+                        case "debug":
+                        case "empty":
+                            break;
+                        default:
+                            removeClass(iconId, "selected");
+                    }
+                }
+
+                iconId = getIconId(newContent);
+                if (iconId.length > 0) {
+                    switch (iconId) {
+                        case "home":
+                        case "calendar":
+                        case "debug":
+                        case "empty":
+                            break;
+                        default:
+                            addClass(iconId, "selected");
+                    }
+
+                }
+            }
+
+            if (debugTrace) console.log("calledFromListener: " + calledFromListener);
+
+            if (!calledFromListener) {
+                calledFromSetContent = true;
+                if (debugTrace) console.log("setting hash: " + newContent.id);
+                window.location.hash = "#" + newContent.id;
+            }
+            pushToTop();
+            currentContent = newContent;
+        }
+
+        // add class to element with supplied Id
+        function addClass(divId, classname) {
+            var el = document.getElementById(divId);
+            // No need to check if class is already assigned.
+            // If it is, it will not be added again.
+            el.classList.add(classname);
+        }
+
+        // remove class from element with supplied Id
+        function removeClass(divId, classname) {
+            var el = document.getElementById(divId);
+            // if class is not assigned, an error will NOT
+            // be thrown.
+            el.classList.remove(divId, classname);
+        }
+
+        // this function returns true if an element id contains the
+        // supplied classname.
+        function testClass(divId, classname) {
+            var el = document.getElementById(divId);
+            return el.classList.contains(divId, classname);
+        }
+
+        // return the Id for footer icon matching supplied content Id
+        // content id must contain a hyphen
+        // leading portion of content id must match an icon id
+        function getIconId(contentDiv) {
+            var contentId = contentDiv.id;
+            var index = contentId.indexOf("-");
+            if (index === -1 || index === 0)
+                return "";
+            return contentId.substring(0, index);
+        }
+
+        // return view port width
+        function viewPortWidth() {
+            return window.innerWidth
+                || document.documentElement.clientWidth
+                || document.body.clientWidth;
+        }
+
+        // return view port height
+        function viewPortHeight() {
+            return window.innerHeight
+                || document.documentElement.clientHeight
+                || document.body.clientHeight;
+        }
+
+        // is device in portriat mode
+        function modeIsPortriat() {
+            return (viewPortHeight() > viewPortWidth());
+        }
+
+        // is device in landscape mode
+        function modeIsLandscape() {
+            return !modeIsPortriat();
+        }
+
+        // make an AJAX call to read in the html file
+        // need this when link import is not supported
+        function getHTML() {
+            var htmlFile;
+            $.get('/imports/tssgPageTemplate.html', function (data) {
+                htmlFile = data;
+                // jQuery.ajaxSetup({ async: true });
+            });
+
+            return htmlFile;
+        }
+
+
+
+        // this can be used to display various debug information.  
+        // currently it is called by a nav-bar button.  
+        function debugStuff() {
+
+            setContent(debugPage);
+
+            document.getElementById("demow").innerHTML =
+                "Screen width is " + screen.width;
+
+            document.getElementById("demoh").innerHTML =
+                "Screen height is " + screen.height;
+
+            document.getElementById("demoaw").innerHTML =
+                "Screen available width is " + screen.availWidth;
+
+            document.getElementById("demoah").innerHTML =
+                "Screen available height is " + screen.availHeight;
+
+            var w = window.innerWidth
+                || document.documentElement.clientWidth
+                || document.body.clientWidth;
+
+            var h = window.innerHeight
+                || document.documentElement.clientHeight
+                || document.body.clientHeight;
+
+            var x = document.getElementById("demows");
+            x.innerHTML = "Browser inner window width: " + w + ", height: " + h + ".";
+
+            document.getElementById("demov").innerHTML = navigator.appVersion;
+
+            document.getElementById("demoa").innerHTML = navigator.userAgent;
+
+            document.getElementById("demop").innerHTML = navigator.platform;
+
+            document.getElementById("demol").innerHTML = navigator.language;
+
+            document.getElementById("isphone").innerHTML = (isPhone) ? "isPhone = true" : "isPhone = false";
+
+            document.getElementById("isportriat").innerHTML = (modeIsPortriat()) ? "isPortriat = true" : "isPortriat = false";
+
+            document.getElementById("islandscape").innerHTML = (modeIsLandscape()) ? "isLandscape = true" : "isLandscape = false";
+
+            document.getElementById("dispfooter").innerHTML = (displayFooter) ? "displayFooter = true" : "displayFooter = false";
+
+        }
+
+        function toggleIsPhone() {
+            isPhone = !isPhone;
+            // winResize does not resize the window.  In only respondes to a resize.
+            // We call it here to respond to a request to set the application into
+            // phone mode for debugging purposes.
+            winResize();
+            // again, for debugging, we have toggled the application 
+            // into/out of phone mode.  display the debug screen.
+            debugStuff();
+        }
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        function pushToTop() {
+            window.scrollTo(0, 0);
+        }
+
+        // this function is setup as an event listener
+        // window.addEventListener('hashchange', hashChanged);
+        function hashChanged() {
+            var newHash = window.location.hash.substring(1);
+            var newContent = "";
+            if (debugTrace) {
+                console.log("newHash: " + newHash);
+                console.log("calledFromSetContent: " + calledFromSetContent);
+            }
+
+            if (calledFromSetContent === true) {
+                calledFromSetContent = false;   
+                 return;
+            }
+
+            // console.log("Find content: " + newHash);
+            switch (newHash) {
+                case 'web-group':
+                    newContent = webContent;
+                    break;
+                case 'mobile-group':
+                    newContent = mobileContent;
+                    break;
+                case 'quality-qroup':
+                    newContent = qualityContent;
+                    break;
+                case 'data-group':
+                    newContent = dataContent;
+                    break;
+                case 'devops-group':
+                case 'devOps-group':
+                    newContent = devOpsContent;
+                    break;
+                case 'calendar-page':
+                    newContent = calendarContent;
+                    break;
+                case 'debug-page':
+                    debugStuff();
+                    // debugStuff() calls setContent, so return
+                    return;
+                default:
+                    newContent = homeContent;
+                    break;
+            }
+            
+            // setContent uses this to know not to change the hash
+            calledFromListener = true;
+            // console.log("newContent: " + newContent.id);
+            // console.log("Calling setContent");
+            setContent(newContent);
+            // console.log("Returning from setContent");
+            calledFromListener = false;
+
+        }
+
+
+        // every thing above is either a variable or a function definition
+        // this is where inline code execution begins.
+
+        // test this browser to see if it supports link import
+        var rslt = 'import' in document.createElement('link');
+        if (rslt) {
+            //  link import is supported, import our document template
+            htmlDoc = document.querySelector('link[rel="import"]').import;
+        }
+        else {
+            // link import is not supported, read document template with jquery
+            if (debugTrace) console.log(" link import not supported");
+            jQuery.ajaxSetup({ async: false });
+            var htmlFile = getHTML();
+            htmlDoc = document.createElement('div');
+            htmlDoc.innerHTML = htmlFile;
+        }
+
+        // Grab the nav-bar div section
+        navbarElement = htmlDoc.querySelector('#nav-bar');
+        // Grab the footer div section
+        footerElement = htmlDoc.querySelector('#footer');
+        // Grab the content of each page
+        homeContent = htmlDoc.querySelector('#home-page');
+        // Initialize currentContent to home page. This will
+        // cause the home page to be the initial page when the 
+        // script is called in the body section below.
+        currentContent = homeContent;
+        mobileContent = htmlDoc.querySelector('#mobile-group');
+        dataContent = htmlDoc.querySelector('#data-group');
+        devOpsContent = htmlDoc.querySelector('#devOps-group');
+        qualityContent = htmlDoc.querySelector('#quality-group');
+        webContent = htmlDoc.querySelector('#web-group');
+        calendarContent = htmlDoc.querySelector('#calendar-page');
+        debugPage = htmlDoc.querySelector('#debug-page');
+        emptyPlaceHolder = htmlDoc.querySelector('#empty-placeHolder');
+
+    </script>
+</head>
+
+<body onresize="winResize()" onload="pushToTop()">
+
+</body>
+
+<!--
+    This code must be executed after the body is established.
+    If necessary it can be moved to the body section.
+
+    This code is called only once and is used to setup
+    the initial page.  
+-->
+<script language="javascript">
+
+    // a href string (#name-group) can be used in the url to by-pass
+    // the home page and go directly to any other page.
+    // the displayed url can be modified at any time to jump to any page.
+    // currentContent is initialized to homeContent above.
+
+    // check to see if a hash has been added to the 
+    // initial url.  If so, user is requesting to initialize
+    // to a page other than home-page.
+    var page = window.location.hash.substring(1);
+    // empty hash will result in home-page
+    if (debugTrace) console.log("page: " + page);
+    switch (page) {
+        case 'web-group':
+            currentContent = webContent;
+            break;
+        case 'mobile-group':
+            currentContent = mobileContent;
+            break;
+        case 'quality-qroup':
+            currentContent = qualityContent;
+            break;
+        case 'data-group':
+            currentContent = dataContent;
+            break;
+        case 'devops-group':
+            // if this is a url parameter, it is being forced to lowercase.
+            // correct case for addClass below.
+            page = 'devOps';
+        // fall through to devOps case.
+        // calls from code use mixed case.
+        case 'devOps-group':
+            currentContent = devOpsContent;
+            break;
+        case 'calendar-page':
+            currentContent = calendarContent;
+            break;
+        case 'debug-page':
+            currentContent = debugPage;
+            break;
+        default:
+            page = ""; // incase it's an unknow page
+            break;
+    }
+
+    // append each section to our DOM in the desired order
+    document.body.appendChild(navbarElement.cloneNode(true));
+    document.body.appendChild(currentContent.cloneNode(true));
+    if (debugData) console.log("currentContent: " + currentContent.innerHTML);
+    if (page === "debug-page") {
+        // debug is a non-static page.
+        // we need to update it.
+        debugStuff();
+    }
+    if (displayFooter) {
+        document.body.appendChild(footerElement.cloneNode(true));
+        if (page) {
+            switch (page) {
+                case "home-page":
+                case "calendar-page":
+                case "debug-page":
+                case "":
+                case "empty":
+                    // these pages do not have a footer icon
+                    break;
+                default:
+                    // make the footer icon selected for the 
+                    // appropriate page.
+                    addClass(getIconId(currentContent), "selected");
+            }
+        }
+    }
+
+    // fix for bootstrap navbar hamburger not collapsing 
+    // when item is selected.
+    $('.navbar-nav li a').on('click', function () {
+        if (!$(this).hasClass('dropdown-toggle')) {
+            $('.navbar-collapse').collapse('hide');
+        }
+    });
+
+    window.addEventListener('hashchange', hashChanged);
+
+</script>
+
+</html>
