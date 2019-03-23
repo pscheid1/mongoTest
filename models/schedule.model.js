@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-var locations =  ["Acton", "Boxborough", "Chelmsford", "Hopkinton"];
+var locations = ["Acton", "Boxborough", "Chelmsford", "Hopkinton"];
 let ScheduleSchema = new Schema({
 
     _id: { type: String, required: true },
@@ -14,6 +14,19 @@ let ScheduleSchema = new Schema({
         required: true,
         enum: locations
     }
+});
+
+
+// db.schedules.createIndex( { name : 1, meetingDate: 1, startTime: 1, endTime: 1, location: 1 }, { unique: true } );
+ScheduleSchema.index({ name: 1, meetingDate: 1, startTime: 1, endTime: 1, location: 1 }, { unique: true, name: "dupEntry"},
+    function (error) {
+            console.log(error);
+    }
+);
+
+
+ScheduleSchema.on('index', function (error, next) {
+    return next(error.message);
 });
 
 // Export the model

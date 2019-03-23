@@ -1,9 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-// const product = require('./routes/product.route'); // Imports routes for the products
-const member = require('./routes/member.route'); // Imports routes for persons
-const schedule = require('./routes/schedule.route'); // Imports routes for schedule
+const member = require('./routes/member.route');
+const schedule = require('./routes/schedule.route');
 const mongoose = require('mongoose');
 
 const path = require('path');
@@ -36,7 +35,7 @@ const options = {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
-  autoIndex: false, // Don't build indexes
+  autoIndex: true, // build indexes
   reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
   reconnectInterval: 500, // Reconnect every 500ms
   poolSize: 10, // Maintain up to 10 socket connections
@@ -61,9 +60,8 @@ db.once('open', function () {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// app.use('/products', product);
 app.use('/members', member);
-app.use('/schedule', schedule);
+app.use('/schedules', schedule);
 
 /*
   The router will look in the supplied folder for any asked page.

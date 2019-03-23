@@ -123,8 +123,7 @@ exports.create = function (req, res, next) {
     );
 
     if ((schedule.startTime.getTime() + (1000 * 60 * 15)) > schedule.endTime.getTime()) {
-        res.send("Error: endTime must be greater than or equal to startTime + 15 minutes.");
-        return;
+        return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
     }
 
     // console.log(schedule);
@@ -134,7 +133,7 @@ exports.create = function (req, res, next) {
             // var indx = errMsg.toString().indexOf('id');
             // res.send(errMsg.toString().substring(0, indx + 1));
             // console.log("indx: " + indx + " - errMsg: " + errMsg);
-            res.send(errMsg);
+            return next (errMsg);
         } else {
             res.send(schedule + ": created.");
         }
@@ -154,16 +153,16 @@ exports.find = function (req, res, next) {
         }
         else // userId does not exists
         {
-            res.send("Error: UserId: " + params.id + " does not exist.");
+            return next("Error: UserId: " + params.id + " does not exist.");
         }
     });
 };
 
-exports.update = function (req, res) {
+exports.update = function (req, res, next) {
 
     var index = req.url.indexOf('?');
     if (index < 0) {
-        res.send("Error: No query string found.");
+        return next("Error: No query string found. Request: " + req.url);
     }
 
     // parse the update query string
@@ -172,8 +171,7 @@ exports.update = function (req, res) {
     Schedule.findOne({ '_id': params.id }, function (errMsg, doc) {
         if (doc === null) {
             // userId does not exist
-            res.send("Error: _id: " + params.id + " does not exist.");
-            return;
+            return next("Error: _id: " + params.id + " does not exist." + errMsg);
         }
 
         // check and update the current meeting name
@@ -225,13 +223,17 @@ exports.update = function (req, res) {
             }
         }
 
+        if ((doc.startTime.getTime() + (1000 * 60 * 15)) > doc.endTime.getTime()) {
+            return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
+        }    
+
         // check and update meeting location
         if (params.location) { doc.location = params.location; }
 
         // save updated meeting document
         doc.save(function (errMsg) {
             if (errMsg) {
-                res.send("Error: " + errMsg);
+                return next("Error: " + errMsg);
             }
             else {
                 res.send(doc + ": updated.");
@@ -254,19 +256,15 @@ exports.delete = function (req, res, next) {
         }
         else // userId does not exists
         {
-            res.send("Error: _id: " + params.id + " does not exist.");
+            return next("Error: _id: " + params.id + " does not exist.");
         }
     });
-};
-
-exports.createIndex = function (req, res) {
-    // db.schedules.createIndex( { name : 1, meetingDate: 1, startTime: 1, endTime: 1, location: 1 }, { unique: true } );
 };
 
 exports.list = function (req, res, next) {
     Schedule.find({}, function (errMsg, docs) {
         if (errMsg || docs == null) {
-            res.send(errMsg);
+            return next(errMsg);
         } else {
             res.send(docs);
         }
