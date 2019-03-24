@@ -18,13 +18,21 @@ let replaceDate = function (oldDate, newDate) {
 
     var newDateOldTime = new Date(
         newDate.getFullYear(),
-        newDate.getMonth() - 1, // change month to 0 through 11
-        newDate.getDay(),
+        // newDate.getMonth() - 1, // change month to 0 through 11
+        (newDate.getMonth()) ,
+        newDate.getDate() + 1,
         oldDate.getHours(),
-        oldDate.getMinutes());
-
+        oldDate.getMinutes(), 0, 0);
+        console.log(newDate.getFullYear() + ", " + (newDate.getMonth()) + ", " + (newDate.getDate() + 1) + ", " + oldDate.getHours() + ", " + oldDate.getMinutes());
+        console.log("oldDate: " + oldDate);
+        console.log("newDate: " + newDate);
+        console.log("newDateOldTime: " + newDateOldTime);
+        var d = new Date();
+        console.log("current day: " + d.getDay());
+        oldDate.setFullYear(newDate.getFullYear(), newDate.getMonth(), newDate.getDate() + 1);
+        console.log("Quick update: " + oldDate);
+        console.log("Updated date: " + newDateOldTime);
     return newDateOldTime;
-
 
 };
 
@@ -126,6 +134,10 @@ exports.create = function (req, res, next) {
         return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
     }
 
+    if ((schedule.startTime.getTime()) <= (new Date().getTime())) {
+        return next("Error:  Meeting date and time cannot be in the past.");
+    }
+
     // console.log(schedule);
 
     schedule.save(function (errMsg) {
@@ -133,9 +145,13 @@ exports.create = function (req, res, next) {
             // var indx = errMsg.toString().indexOf('id');
             // res.send(errMsg.toString().substring(0, indx + 1));
             // console.log("indx: " + indx + " - errMsg: " + errMsg);
-            return next (errMsg);
+            return next(errMsg);
         } else {
-            res.send(schedule + ": created.");
+            if (schedule.meetingDate.getDay() !== 3) {
+                res.send(schedule + ": created." + "<h4 style='color:red;'> Warning: Meeting date is not a Wednesday.</h4>");
+            } else {
+                res.send(schedule + ": created.");
+            }
         }
     });
 };
@@ -173,7 +189,8 @@ exports.update = function (req, res, next) {
             // userId does not exist
             return next("Error: _id: " + params.id + " does not exist." + errMsg);
         }
-
+        console.log("1: " + doc);
+        console.log("1.1: " + params.date);
         // check and update the current meeting name
         if (params.name) { doc.name = params.name; }
 
@@ -186,7 +203,7 @@ exports.update = function (req, res, next) {
                 return;
             }
         }
-
+        console.log("2: " + doc);
         if (params.endTime) {
             // update the current meeting end time object
             try {
@@ -196,51 +213,67 @@ exports.update = function (req, res, next) {
                 return;
             }
         }
-
+        console.log("3: " + doc);
         // meetingDate should always have a 0 time component
         if (params.date) {
             // update the current meeting date object
             doc.meetingDate = params.date;
-
+            console.log("4: " + doc);
             // because meetingDate has been changed, date component of startTime and endTime must be changed
 
             // get new date for startTime
-            try {
+            doc.startTime.setFullYear(doc.meetingDate.getFullYear(), doc.meetingDate.getMonth(), doc.meetingDate.getDate() + 1);
+/*             try {
                 // replace date portion of startTime object with new meeting date
                 doc.startTime = replaceDate(doc.startTime, doc.meetingDate);
             } catch (errMsg) {
                 res.send("Error: " + errMsg);
                 return;
             }
-
+ */            console.log("5: " + doc);
             // get new date for endTime
-            try {
+            doc.endTime.setFullYear(doc.meetingDate.getFullYear(), doc.meetingDate.getMonth(), doc.meetingDate.getDate() + 1);
+/*             try {
                 // replace date potion of endTime object with new meeting date
                 doc.endTime = replaceDate(doc.endTime, doc.meetingDate);
             } catch (errMsg) {
                 res.send("Error: " + errMsg);
                 return;
             }
-        }
-
+ */        }
+        console.log("6: " + doc);
         if ((doc.startTime.getTime() + (1000 * 60 * 15)) > doc.endTime.getTime()) {
             return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
-        }    
+        }
+
+        if ((doc.startTime.getTime()) <= (new Date().getTime())) {
+            return next(doc.startTime + " - " + new Date() + " - Error:  Meeting date and time cannot be in the past.");
+            // return next("Error:  Meeting date and time cannot be in the past.");
+        }
 
         // check and update meeting location
         if (params.location) { doc.location = params.location; }
 
         // save updated meeting document
+        console.log("7: " + doc);
         doc.save(function (errMsg) {
             if (errMsg) {
                 return next("Error: " + errMsg);
-            }
-            else {
-                res.send(doc + ": updated.");
+            } else {
+                console.log("8: " + doc);
+                console.log("Month:" + doc.meetingDate.getMonth());
+                console.log("Day:" + doc.meetingDate.getDate());
+                console.log("Day of week:" + doc.meetingDate.getDay());
+                if (doc.meetingDate.getDay() != 4) {   // month is 0 - 11
+                    res.send(doc + ": updated." + "<h4 style='color:red;'> Warning: Meeting date is not a Wednesday.</h4>");
+                } else {
+                    res.send(doc + ": updated.");
+                }
             }
         });
     });
 };
+
 
 exports.delete = function (req, res, next) {
     var index = req.url.indexOf('?');
