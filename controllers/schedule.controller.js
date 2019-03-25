@@ -13,29 +13,6 @@ var parseQueryString = function (queryString) {
     return params;
 };
 
-// replace date component of oldDate object keeping its time component
-let replaceDate = function (oldDate, newDate) {
-
-    var newDateOldTime = new Date(
-        newDate.getFullYear(),
-        // newDate.getMonth() - 1, // change month to 0 through 11
-        (newDate.getMonth()) ,
-        newDate.getDate() + 1,
-        oldDate.getHours(),
-        oldDate.getMinutes(), 0, 0);
-        console.log(newDate.getFullYear() + ", " + (newDate.getMonth()) + ", " + (newDate.getDate() + 1) + ", " + oldDate.getHours() + ", " + oldDate.getMinutes());
-        console.log("oldDate: " + oldDate);
-        console.log("newDate: " + newDate);
-        console.log("newDateOldTime: " + newDateOldTime);
-        var d = new Date();
-        console.log("current day: " + d.getDay());
-        oldDate.setFullYear(newDate.getFullYear(), newDate.getMonth(), newDate.getDate() + 1);
-        console.log("Quick update: " + oldDate);
-        console.log("Updated date: " + newDateOldTime);
-    return newDateOldTime;
-
-};
-
 // currently this function is not being used
 /*
 let saveCodeForNow = function (ISOdate, year, month, day) {
@@ -86,7 +63,6 @@ let saveCodeForNow = function (ISOdate, year, month, day) {
 // replace time component of ISOdate object
 let replaceTime = function (ISOdate, newTime) {
 
-
     // newTime should be a string hh:mm
     if (newTime.length < 5) {
         throw "Error: Function replaceTime, Invalid newTime format.";
@@ -99,15 +75,13 @@ let replaceTime = function (ISOdate, newTime) {
     var jDate = ISOdate.toJSON();
     var indx = jDate.indexOf("T");
     if (indx < 0) {
-        throw "Error: Function replaceTime, Invalid date format.";
+        throw "Error: Function replaceTime, Invalid ISOdate format.";
     }
-
-    // jDate = jDate.substr(0, indx +1) + newTime + ":00.000Z";
 
     return new Date(jDate.substr(0, indx + 1) + newTime + ":00.000Z");
 };
 
-//http://localhost:7010/schedule/create?name=Box%20Lib&startTime=13:00&endTime=17:30&location=Boxborough&date=2019-03-27
+//http://localhost:7010/schedules/create?id=xx&name=Box%20Lib&startTime=13:00&endTime=17:30&location=Boxborough&date=2019-03-27
 
 // This code assumes that startTime and endTime are during the same day
 exports.create = function (req, res, next) {
@@ -130,10 +104,12 @@ exports.create = function (req, res, next) {
         }
     );
 
+    // ensure meeting is at least 15 minutes or greater
     if ((schedule.startTime.getTime() + (1000 * 60 * 15)) > schedule.endTime.getTime()) {
         return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
     }
 
+    // ensure meeting start time is greater than current time
     if ((schedule.startTime.getTime()) <= (new Date().getTime())) {
         return next("Error:  Meeting date and time cannot be in the past.");
     }
@@ -189,11 +165,15 @@ exports.update = function (req, res, next) {
             // userId does not exist
             return next("Error: _id: " + params.id + " does not exist." + errMsg);
         }
-        console.log("1: " + doc);
-        console.log("1.1: " + params.date);
+
         // check and update the current meeting name
         if (params.name) { doc.name = params.name; }
 
+        /*  
+            First we check to see if startTime and/or endTime are being
+            updated. For each, if being updated we replace the doc entry
+            with with one containing the original date and the new time.
+        */
         if (params.startTime) {
             // update the current meeting start time object
             try {
@@ -203,7 +183,7 @@ exports.update = function (req, res, next) {
                 return;
             }
         }
-        console.log("2: " + doc);
+
         if (params.endTime) {
             // update the current meeting end time object
             try {
@@ -213,39 +193,30 @@ exports.update = function (req, res, next) {
                 return;
             }
         }
-        console.log("3: " + doc);
+
+        /*
+            Next we check to see if the meeting date is being updated. If true,
+            we then update the doc values for startTime and endTime with the 
+            new meetingDate keeping their current time entry.  
+        */
         // meetingDate should always have a 0 time component
         if (params.date) {
             // update the current meeting date object
             doc.meetingDate = params.date;
-            console.log("4: " + doc);
-            // because meetingDate has been changed, date component of startTime and endTime must be changed
-
-            // get new date for startTime
+            
+            // replace startTime date with new meetingDate
             doc.startTime.setFullYear(doc.meetingDate.getFullYear(), doc.meetingDate.getMonth(), doc.meetingDate.getDate() + 1);
-/*             try {
-                // replace date portion of startTime object with new meeting date
-                doc.startTime = replaceDate(doc.startTime, doc.meetingDate);
-            } catch (errMsg) {
-                res.send("Error: " + errMsg);
-                return;
-            }
- */            console.log("5: " + doc);
-            // get new date for endTime
+
+            // replace endTime date with new meetingDate
             doc.endTime.setFullYear(doc.meetingDate.getFullYear(), doc.meetingDate.getMonth(), doc.meetingDate.getDate() + 1);
-/*             try {
-                // replace date potion of endTime object with new meeting date
-                doc.endTime = replaceDate(doc.endTime, doc.meetingDate);
-            } catch (errMsg) {
-                res.send("Error: " + errMsg);
-                return;
-            }
- */        }
-        console.log("6: " + doc);
+        }
+
+        // ensure meeting is at least 15 minutes or greater
         if ((doc.startTime.getTime() + (1000 * 60 * 15)) > doc.endTime.getTime()) {
             return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
         }
 
+        // ensure meeting start time is greater than current time
         if ((doc.startTime.getTime()) <= (new Date().getTime())) {
             return next(doc.startTime + " - " + new Date() + " - Error:  Meeting date and time cannot be in the past.");
             // return next("Error:  Meeting date and time cannot be in the past.");
@@ -255,15 +226,11 @@ exports.update = function (req, res, next) {
         if (params.location) { doc.location = params.location; }
 
         // save updated meeting document
-        console.log("7: " + doc);
+
         doc.save(function (errMsg) {
             if (errMsg) {
                 return next("Error: " + errMsg);
             } else {
-                console.log("8: " + doc);
-                console.log("Month:" + doc.meetingDate.getMonth());
-                console.log("Day:" + doc.meetingDate.getDate());
-                console.log("Day of week:" + doc.meetingDate.getDay());
                 if (doc.meetingDate.getDay() != 4) {   // month is 0 - 11
                     res.send(doc + ": updated." + "<h4 style='color:red;'> Warning: Meeting date is not a Wednesday.</h4>");
                 } else {
@@ -273,7 +240,6 @@ exports.update = function (req, res, next) {
         });
     });
 };
-
 
 exports.delete = function (req, res, next) {
     var index = req.url.indexOf('?');
@@ -304,6 +270,15 @@ exports.list = function (req, res, next) {
     });
 };
 
+// for development we have autoIndex set to true.
+// if we want to switch to manual indexing this function can be called.
+exports.createIndexes = function(req, res) {
+
+    Schedule.ensureIndexes();
+    // Schedule.createIndexes();
+    res.send("Indexes created.");
+};
+
 exports.index = function (req, res) {
     res.send('Error: We should never get to this function. - "schedule.controller.index"');
     return;
@@ -311,7 +286,7 @@ exports.index = function (req, res) {
 
 //Simple version, without validation or sanitation
 exports.test = function (req, res) {
-
+    
     // res.send('Greetings from the member controller!');
     // res.sendFile(__dirname + '/index.html');
     res.send('globalRoot: ' + global.Root + ' - folders: ' + global.Folders + ' - packageName: ' + global.PackageName + ' - __dirname: ' + __dirname);

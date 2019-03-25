@@ -14,19 +14,23 @@ let ScheduleSchema = new Schema({
         required: true,
         enum: locations
     }
+}, {autoIndex: true});
+
+// create an index to define a duplicate entry
+// if autoIndex is true, mongoose will call sequentially each defined index 
+// to create the indexes manually invoke createIndexes which will call this function.  (see createIndex call in schedule.controller)
+ScheduleSchema.index({ name: 1, meetingDate: 1, startTime: 1, endTime: 1, location: 1 }, { unique: true, name: "dupEntry"});
+
+/* // Dummy index for testing
+ScheduleSchema.index({name: 1, noName: -1}, {name: "testIndex1"});
+
+ScheduleSchema.index(({name: 1, noName2: -1}, {name: "testIndex2"}), function() {
+    console.log("xxxxxxxxxxxxx");
 });
+ */
 
-
-// db.schedules.createIndex( { name : 1, meetingDate: 1, startTime: 1, endTime: 1, location: 1 }, { unique: true } );
-ScheduleSchema.index({ name: 1, meetingDate: 1, startTime: 1, endTime: 1, location: 1 }, { unique: true, name: "dupEntry"},
-    function (error) {
-            console.log(error);
-    }
-);
-
-
-ScheduleSchema.on('index', function (error, next) {
-    return next(error.message);
+ScheduleSchema.on('index', function (error) {
+    console.log("ScheduleSchema createIndex error: " + error.message);
 });
 
 // Export the model
