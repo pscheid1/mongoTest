@@ -1,5 +1,6 @@
 const Schedule = require('../models/schedule.model');
 
+
 // parse query string
 var parseQueryString = function (queryString) {
     var params = {}, queries, temp, i, l;
@@ -84,7 +85,7 @@ let replaceTime = function (ISOdate, newTime) {
 //http://localhost:7010/schedules/create?id=xx&name=Box%20Lib&startTime=13:00&endTime=17:30&location=Boxborough&date=2019-03-27
 
 // This code assumes that startTime and endTime are during the same day
-exports.create = function (req, res, next) {
+exports.xxxcreate = function (req, res, next) {
 
     var index = req.url.indexOf('?');
     if (index < 0) {
@@ -132,7 +133,54 @@ exports.create = function (req, res, next) {
     });
 };
 
-exports.find = function (req, res, next) {
+module.exports = {
+
+    create: function(req, res) {
+        console.log("111111111");
+        console.log("req location: " + req.query.location);//outputs 'undefined'
+        console.log("req meetingDate: " + req.query.meetingDate);//outputs '[object object]'
+
+		Schedule.create(req.query)
+			.then(newSchedule => res.json(newSchedule))
+			.catch(err => res.status(422).json(err + "???????????"));
+	},
+
+	update: function(req, res) {
+        console.log("22222222");
+		Schedule.findByIdAndUpdate({ '_id': req.query._id }, req.body)
+			.then(schedule => res.json(schedule))
+			.catch(err => res.status(422).json(err));
+	},
+
+    findAll: function (req, res) {
+        console.log("33333333333");
+        // console.log("url: " + req.url);
+        // console.log("query: " + req.query.id + " - " + req.query.location);
+        // Schedule.find({'location':req.query.location})
+        Schedule.find({ })
+            .then(schedules => res.json(schedules))
+            .catch(err => res.status(422).json(err.message));
+    },
+    
+    findOne: function (req, res) {
+        console.log("44444444444");
+        Schedule.findById(req.query._id)
+            .then(schedule => res.json(schedule))
+            .catch(err => res.status(422).json(err));
+    },
+
+    delete: function (req, res) {
+        console.log("55555555555");
+        Schedule.findByIdAndDelete(req.query._id)
+            // .then(schedule => schedule.remove())
+            .then(schedule => res.json(schedule + ": deleted"))
+            .catch(err => res.status(422).json(err));
+    }
+    
+};
+
+exports.xxfind = function (req, res, next) {
+
     var index = req.url.indexOf('?');
     if (index < 0) {
         return next("No query string found.");
@@ -150,7 +198,9 @@ exports.find = function (req, res, next) {
     });
 };
 
-exports.update = function (req, res, next) {
+// {{ `${variable.getDate()}/${variable.getMonth()}/${variable.getFullYear()}` }}
+
+exports.xxxupdate = function (req, res, next) {
 
     var index = req.url.indexOf('?');
     if (index < 0) {
@@ -203,7 +253,7 @@ exports.update = function (req, res, next) {
         if (params.date) {
             // update the current meeting date object
             doc.meetingDate = params.date;
-            
+
             // replace startTime date with new meetingDate
             doc.startTime.setFullYear(doc.meetingDate.getFullYear(), doc.meetingDate.getMonth(), doc.meetingDate.getDate() + 1);
 
@@ -241,7 +291,7 @@ exports.update = function (req, res, next) {
     });
 };
 
-exports.delete = function (req, res, next) {
+exports.xxxdelete = function (req, res, next) {
     var index = req.url.indexOf('?');
     if (index < 0) {
         return next("No query string found.");
@@ -260,7 +310,7 @@ exports.delete = function (req, res, next) {
     });
 };
 
-exports.list = function (req, res, next) {
+exports.xxxlist = function (req, res, next) {
     Schedule.find({}, function (errMsg, docs) {
         if (errMsg || docs == null) {
             return next(errMsg);
@@ -272,7 +322,7 @@ exports.list = function (req, res, next) {
 
 // for development we have autoIndex set to true.
 // if we want to switch to manual indexing this function can be called.
-exports.createIndexes = function(req, res) {
+exports.createIndexes = function (req, res) {
 
     Schedule.ensureIndexes();
     // Schedule.createIndexes();
@@ -286,7 +336,7 @@ exports.index = function (req, res) {
 
 //Simple version, without validation or sanitation
 exports.test = function (req, res) {
-    
+
     // res.send('Greetings from the member controller!');
     // res.sendFile(__dirname + '/index.html');
     res.send('globalRoot: ' + global.Root + ' - folders: ' + global.Folders + ' - packageName: ' + global.PackageName + ' - __dirname: ' + __dirname);
