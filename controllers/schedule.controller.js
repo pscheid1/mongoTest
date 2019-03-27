@@ -94,7 +94,7 @@ module.exports = {
             .catch(err => res.status(422).json(err));
     },
 
-    //http://localhost:7010/schedules/create?id=xx&name=Box%20Lib&startTime=13:00&endTime=17:30&location=Boxborough&date=2019-03-27
+    //http://localhost:7010/schedules/create?_id=xx&name=Box%20Lib&startTime=13:00&endTime=17:30&location=Boxborough&meetingDate=2019-03-27
 
     // This code assumes that startTime and endTime are during the same day
 
@@ -118,6 +118,8 @@ module.exports = {
             }
         );
 
+        console.log(schedule);
+
         // ensure meeting start time is greater than current time
         if ((schedule.startTime.getTime()) <= (new Date().getTime())) {
             return next("Error:  Meeting date and time cannot be in the past.");
@@ -134,21 +136,34 @@ module.exports = {
         } else {
             result = ": created.";
         }
-        console.log("result: " + result);
+
         Schedule.create(schedule)
             .then(newSchedule => res.json(newSchedule + result))
             .catch(err => res.status(422).json(err));
     },
 
-    update: function (req, res) {
-        console.log("22222222");
-        Schedule.findByIdAndUpdate({ '_id': req.query._id }, req.body)
-            .then(schedule => res.json(schedule))
+    update: function (req, res, next) {
+        /*
+            Until we build the frontend code we need to get 
+            the existing entry.  Once the frontend code is 
+            developed, these operations can be performed there.
+        */
+        Schedule.findOne({ '_id': req.query._id }, function (errMsg, doc) {
+            if (doc === null) {
+                // userId does not exist
+                return next("Error: _id: " + params.id + " does not exist." + errMsg);
+            }
+            console.log("doc: " + doc);
+            var rslt = updateSchedule(doc, req);
+            console.log("updateSchedule: " + rslt);
+        });
+
+        Schedule.findById({ "_id": req.query._id })
+            .then(schedule => res.json(updateSchedule(schedule, req)))
             .catch(err => res.status(422).json(err));
     },
 
     findAll: function (req, res) {
-        console.log("33333333333");
         // console.log("url: " + req.url);
         // console.log("query: " + req.query.id + " - " + req.query.location);
         // Schedule.find({'location':req.query.location})
@@ -158,16 +173,13 @@ module.exports = {
     },
 
     findOne: function (req, res) {
-        console.log("44444444444");
         Schedule.findById(req.query._id)
             .then(schedule => res.json(schedule))
             .catch(err => res.status(422).json(err));
     },
 
     delete: function (req, res) {
-        console.log("55555555555");
         Schedule.findByIdAndDelete(req.query._id)
-            // .then(schedule => schedule.remove())
             .then(schedule => res.json(schedule + ": deleted"))
             .catch(err => res.status(422).json(err));
     },
@@ -178,6 +190,108 @@ module.exports = {
         res.send('globalRoot: ' + global.Root + ' - folders: ' + global.Folders + ' - packageName: ' + global.PackageName + ' - __dirname: ' + __dirname);
     }
 
+};
+
+/*
+    This helper function does the heavy lifting for the 
+    schedule.update request. It returns a result string to 
+    be used as the response to the request.
+
+    Any errors result in a "throw" and will be caught
+    in the calling function.
+    Parameters:
+        schedule    = a Schedule instantiation of the current document.
+        req         = the request object submitted for the update.
+*/
+let updateSchedule = function (schedule, req) {
+
+    if (false) {
+        throw "Test error message from updateSchedule";
+    }
+
+    console.log("0: " + schedule);
+
+    // check and update the current meeting name
+    if (req.query.name) { schedule.name = req.query.name; }
+
+    /*  
+        First we check to see if startTime and/or endTime are being
+        updated. For each, if being updated we replace the schedule entry
+        with with one containing the original date and the new time.
+    */
+    if (req.query.startTime) {
+        // update the current meeting start time object
+        try {
+            schedule.startTime = replaceTime(schedule.meetingDate, req.query.startTime);
+        } catch (errMsg) {
+            throw "Error: " + errMsg;
+        }
+    }
+
+    if (req.query.endTime) {
+        // update the current meeting end time object
+        try {
+            schedule.endTime = replaceTime(schedule.meetingDate, req.query.endTime);
+        } catch (errMsg) {
+            throw "Error: " + errMsg;
+        }
+    }
+
+    /*
+        Next we check to see if the meeting date is being updated. If true,
+        we then update the schedule values for startTime and endTime with the 
+        new meetingDate keeping their current time entry.  
+    */
+    // meetingDate should always have a 0 time component
+    if (req.query.date) {
+        // update the current meeting date object
+        schedule.meetingDate = new Date(req.query.date);
+
+        // replace startTime date with new meetingDate
+        schedule.startTime.setFullYear(schedule.meetingDate.getFullYear(), schedule.meetingDate.getMonth(), schedule.meetingDate.getDate() + 1);
+
+        // replace endTime date with new meetingDate
+        schedule.endTime.setFullYear(schedule.meetingDate.getFullYear(), schedule.meetingDate.getMonth(), schedule.meetingDate.getDate() + 1);
+    }
+
+    // ensure meeting is at least 15 minutes or greater
+    if ((schedule.startTime.getTime() + (1000 * 60 * 15)) > schedule.endTime.getTime()) {
+        throw "Error: endTime must be greater than or equal to startTime + 15 minutes.";
+    }
+
+    // ensure meeting start time is greater than current time
+    if ((schedule.startTime.getTime()) <= (new Date().getTime())) {
+        throw (schedule.startTime + " - " + new Date() + " - Error:  Meeting date and time cannot be in the past.");
+        // throw "Error:  Meeting date and time cannot be in the past.";
+    }
+
+    // check and update meeting location
+    if (req.query.location) { schedule.location = req.query.location; }
+    console.log("1: " + schedule);
+    // save updated meeting scheduleument
+    console.log("query.meetingDate: " + req.query.meetingDate);
+    // schedule.meetingDate = new Date(rec.query.meetingDate + "T00:00:00Z");
+    console.log("schedule.meetingDate: " + schedule.meetingDate);
+    var query = { _id: req.query._id }
+    var options = { new: true };
+    var update = { location: "FoxBorough" };
+    console.log("2: " + schedule);
+    var newValues = { $set: { "location": req.query.location, "meetingDate": req.query.meetingDate } };
+    Schedule.findOneAndUpdate(
+        {
+            "_id": req.query._id
+        },
+        newValues,
+        { new: true }, function (err, rslt) {
+            if (err) {
+                console.log(err);
+                throw err;
+            } else {
+                console.log("3: " + rslt);
+                return rslt;
+            }
+        }
+    );
 };
 
 // {{ `${variable.getDate()}/${variable.getMonth()}/${variable.getFullYear()}` }}
