@@ -82,86 +82,81 @@ let replaceTime = function (ISOdate, newTime) {
     return new Date(jDate.substr(0, indx + 1) + newTime + ":00.000Z");
 };
 
-//http://localhost:7010/schedules/create?id=xx&name=Box%20Lib&startTime=13:00&endTime=17:30&location=Boxborough&date=2019-03-27
-
-// This code assumes that startTime and endTime are during the same day
-exports.xxxcreate = function (req, res, next) {
-
-    var index = req.url.indexOf('?');
-    if (index < 0) {
-        return next("No query string found.");
-    }
-
-    var params = parseQueryString(req.url.substr(index + 1));
-
-    let schedule = new Schedule(
-        {
-            "_id": params.id,
-            "name": params.name,
-            "meetingDate": new Date(params.date),
-            "startTime": new Date(params.date + "T" + params.startTime),
-            "endTime": new Date(params.date + "T" + params.endTime),
-            "location": params.location
-        }
-    );
-
-    // ensure meeting is at least 15 minutes or greater
-    if ((schedule.startTime.getTime() + (1000 * 60 * 15)) > schedule.endTime.getTime()) {
-        return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
-    }
-
-    // ensure meeting start time is greater than current time
-    if ((schedule.startTime.getTime()) <= (new Date().getTime())) {
-        return next("Error:  Meeting date and time cannot be in the past.");
-    }
-
-    // console.log(schedule);
-
-    schedule.save(function (errMsg) {
-        if (errMsg) {
-            // var indx = errMsg.toString().indexOf('id');
-            // res.send(errMsg.toString().substring(0, indx + 1));
-            // console.log("indx: " + indx + " - errMsg: " + errMsg);
-            return next(errMsg);
-        } else {
-            if (schedule.meetingDate.getDay() !== 3) {
-                res.send(schedule + ": created." + "<h4 style='color:red;'> Warning: Meeting date is not a Wednesday.</h4>");
-            } else {
-                res.send(schedule + ": created.");
-            }
-        }
-    });
-};
-
 module.exports = {
 
-    create: function(req, res) {
-        console.log("111111111");
-        console.log("req location: " + req.query.location);//outputs 'undefined'
-        console.log("req meetingDate: " + req.query.meetingDate);//outputs '[object object]'
+    // for development we have autoIndex set to true.
+    // if we want to switch to manual indexing this function can be called.
+    createIndexes: function (req, res) {
 
-		Schedule.create(req.query)
-			.then(newSchedule => res.json(newSchedule))
-			.catch(err => res.status(422).json(err + "???????????"));
-	},
+        // Schedule.createIndexes();
+        Schedule.ensureIndexes()
+            .then(res.json("Indexes created"))
+            .catch(err => res.status(422).json(err));
+    },
 
-	update: function(req, res) {
+    //http://localhost:7010/schedules/create?id=xx&name=Box%20Lib&startTime=13:00&endTime=17:30&location=Boxborough&date=2019-03-27
+
+    // This code assumes that startTime and endTime are during the same day
+
+    create: function (req, res, next) {
+
+        /*
+            We could let express create the schedule and store the document but
+            then we couldn't perform the below tests.  We could put these in
+            the front-end code or possibly create indexes to test for these 
+            conditions but for now we'll perform the test here.
+        */
+
+        let schedule = new Schedule(
+            {
+                "_id": req.query._id,
+                "name": req.query.name,
+                "meetingDate": new Date(req.query.meetingDate),
+                "startTime": new Date(req.query.meetingDate + "T" + req.query.startTime),
+                "endTime": new Date(req.query.meetingDate + "T" + req.query.endTime),
+                "location": req.query.location
+            }
+        );
+
+        // ensure meeting start time is greater than current time
+        if ((schedule.startTime.getTime()) <= (new Date().getTime())) {
+            return next("Error:  Meeting date and time cannot be in the past.");
+        }
+
+        // ensure meeting is at least 15 minutes or greater
+        if ((schedule.startTime.getTime() + (1000 * 60 * 15)) > schedule.endTime.getTime()) {
+            return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
+        }
+
+        var result;
+        if (schedule.meetingDate.getDay() !== 3) {
+            result = " : created.      Warning: Meeting date is not a Wednesday.";
+        } else {
+            result = ": created.";
+        }
+        console.log("result: " + result);
+        Schedule.create(schedule)
+            .then(newSchedule => res.json(newSchedule + result))
+            .catch(err => res.status(422).json(err));
+    },
+
+    update: function (req, res) {
         console.log("22222222");
-		Schedule.findByIdAndUpdate({ '_id': req.query._id }, req.body)
-			.then(schedule => res.json(schedule))
-			.catch(err => res.status(422).json(err));
-	},
+        Schedule.findByIdAndUpdate({ '_id': req.query._id }, req.body)
+            .then(schedule => res.json(schedule))
+            .catch(err => res.status(422).json(err));
+    },
 
     findAll: function (req, res) {
         console.log("33333333333");
         // console.log("url: " + req.url);
         // console.log("query: " + req.query.id + " - " + req.query.location);
         // Schedule.find({'location':req.query.location})
-        Schedule.find({ })
+        Schedule.find({})
             .then(schedules => res.json(schedules))
             .catch(err => res.status(422).json(err.message));
     },
-    
+
     findOne: function (req, res) {
         console.log("44444444444");
         Schedule.findById(req.query._id)
@@ -175,27 +170,14 @@ module.exports = {
             // .then(schedule => schedule.remove())
             .then(schedule => res.json(schedule + ": deleted"))
             .catch(err => res.status(422).json(err));
+    },
+
+    //Simple version, without validation or sanitation
+    test: function (req, res) {
+
+        res.send('globalRoot: ' + global.Root + ' - folders: ' + global.Folders + ' - packageName: ' + global.PackageName + ' - __dirname: ' + __dirname);
     }
-    
-};
 
-exports.xxfind = function (req, res, next) {
-
-    var index = req.url.indexOf('?');
-    if (index < 0) {
-        return next("No query string found.");
-    }
-    var params = parseQueryString(req.url.substr(index + 1));
-
-    Schedule.findOne({ '_id': params.id }, function (err, doc) {
-        if (doc !== null) {
-            res.send(doc);
-        }
-        else // userId does not exists
-        {
-            return next("Error: UserId: " + params.id + " does not exist.");
-        }
-    });
 };
 
 // {{ `${variable.getDate()}/${variable.getMonth()}/${variable.getFullYear()}` }}
@@ -291,55 +273,9 @@ exports.xxxupdate = function (req, res, next) {
     });
 };
 
-exports.xxxdelete = function (req, res, next) {
-    var index = req.url.indexOf('?');
-    if (index < 0) {
-        return next("No query string found.");
-    }
-    var params = parseQueryString(req.url.substr(index + 1));
-
-    Schedule.findOne({ '_id': params.id }, function (errMsg, doc) {
-        if (doc !== null) {
-            doc.remove();
-            res.send(doc + ": removed.");
-        }
-        else // userId does not exists
-        {
-            return next("Error: _id: " + params.id + " does not exist.");
-        }
-    });
-};
-
-exports.xxxlist = function (req, res, next) {
-    Schedule.find({}, function (errMsg, docs) {
-        if (errMsg || docs == null) {
-            return next(errMsg);
-        } else {
-            res.send(docs);
-        }
-    });
-};
-
-// for development we have autoIndex set to true.
-// if we want to switch to manual indexing this function can be called.
-exports.createIndexes = function (req, res) {
-
-    Schedule.ensureIndexes();
-    // Schedule.createIndexes();
-    res.send("Indexes created.");
-};
-
 exports.index = function (req, res) {
     res.send('Error: We should never get to this function. - "schedule.controller.index"');
     return;
-};
-
-//Simple version, without validation or sanitation
-exports.test = function (req, res) {
-
-    // res.send('Greetings from the member controller!');
-    // res.sendFile(__dirname + '/index.html');
-    res.send('globalRoot: ' + global.Root + ' - folders: ' + global.Folders + ' - packageName: ' + global.PackageName + ' - __dirname: ' + __dirname);
 };
 
 
