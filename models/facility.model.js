@@ -53,7 +53,7 @@ let ScheduleSchema = new Schema({
     }
 }, {autoIndex: true});
 
-/* let MeetingSchema = new Schema({
+let MeetingSchema = new Schema({
 
     _id: { type: String, required: true },
     facility: {                                     // _id of Facility item
@@ -75,15 +75,17 @@ let FacilitySchema = new Schema({
     facility: {
         name: {
             type: String,
-            required: true
+            required: true,
+            enum: names
         },
         street: {
             type: String,
-            required: true
+            required: false
         },
         town: {
             type: String,
-            required: true
+            required: false,
+            enum: locations
         },
         link: {
             type: String,
@@ -93,7 +95,7 @@ let FacilitySchema = new Schema({
     
 }, { autoIndex: false });
 
- */
+
 // create an index to define a duplicate entry
 // if autoIndex is true, mongoose will call sequentially each defined index 
 // to create the indexes manually invoke createIndexes which will call this function.  (see createIndex call in schedule.controller)
@@ -112,5 +114,5 @@ ScheduleSchema.on('index', function (error) {
 });
 
 // Export the model
-module.exports = mongoose.model('Schedule', ScheduleSchema);
 
+module.exports = mongoose.model('Facility', FacilitySchema);
