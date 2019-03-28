@@ -148,19 +148,126 @@ module.exports = {
             the existing entry.  Once the frontend code is 
             developed, these operations can be performed there.
         */
-        Schedule.findOne({ '_id': req.query._id }, function (errMsg, doc) {
-            if (doc === null) {
-                // userId does not exist
-                return next("Error: _id: " + params.id + " does not exist." + errMsg);
-            }
-            console.log("doc: " + doc);
-            var rslt = updateSchedule(doc, req);
-            console.log("updateSchedule: " + rslt);
-        });
 
-        Schedule.findById({ "_id": req.query._id })
-            .then(schedule => res.json(updateSchedule(schedule, req)))
-            .catch(err => res.status(422).json(err));
+        /*
+            First we need to get the current meetingDate because any startTime and endTime changes
+            will not contain a date component.  This will also server as a check for the existance
+            of the account to be updated.  If we move this code to the frontend these changes will
+            alread contain the date component.
+        */
+       let currentSchedule = new Schedule();
+       console.log("currentSchedule: " + currentSchedule);
+        Schedule.findOne({ '_id': req.query._id }, function (errMsg, currentSchedule) {
+            if (currentSchedule === null) {
+                // userId does not exist
+                return next("Error: _id: " + req.query._id + " does not exist." + errMsg);
+            }
+            console.log("currentSchedule: " + currentSchedule);
+            let changes = new Schedule();
+
+            // check/update the current meeting name
+            if (req.query.name) { changes.name = req.query.name; }
+
+            /*  
+                First we check to see if startTime and/or endTime are being
+                updated. For each, if being updated we replace the schedule entry
+                with with one containing the original date and the new time.
+            */
+            if (req.query.startTime) {
+                // update the current meeting start time object
+                try {
+                    changes.startTime = replaceTime(currentSchedule.meetingDate, req.query.startTime);
+                } catch (errMsg) {
+                    return next("Error: " + errMsg);
+                }
+            }
+
+            if (req.query.endTime) {
+                // update the current meeting end time object
+                try {
+                    changes.endTime = replaceTime(currentSchedule.meetingDate, req.query.endTime);
+                } catch (errMsg) {
+                    return next("Error: " + errMsg);
+                }
+            }
+
+            /*
+                Next we check to see if the meeting date is being updated. If true,
+                we then update the schedule values for startTime and endTime with the 
+                new meetingDate keeping their current time entry.  
+            */
+            // meetingDate should always have a 0 time component
+            if (req.query.meetingDate) {
+                // update the current meeting date object
+                changes.meetingDate = new Date(req.query.meetingDate);
+
+                // replace startTime date with new meetingDate
+                if (changes.startTime) {
+                    // if there is a new startTime, give it the new meetingDate
+                    changes.startTime.setFullYear(changes.meetingDate.getFullYear(),
+                        changes.meetingDate.getMonth(),
+                        changes.meetingDate.getDate() + 1);
+                } else {
+                    // else give the old startTime the new meetingDate
+                    changes.startTime =
+                        currentSchedule.startTime.setFullYear(changes.meetingDate.getFullYear(),
+                            changes.meetingDate.getMonth(),
+                            changes.meetingDate.getDate() + 1);
+                }
+
+                // replace endTime date with new meetingDate
+                if (changes.endTime) {
+                    // if there is a new endTime, give it the new meetingDate
+                    changes.endTime.setFullYear(changes.meetingDate.getFullYear(),
+                        changes.meetingDate.getMonth(),
+                        changes.meetingDate.getDate() + 1);
+                } else {
+                    // else give the old endTime the new meetingDate
+                    changes.startTime =
+                        currentSchedule.endTime.setFullYear(changes.meetingDate.getFullYear(),
+                            changes.meetingDate.getMonth(),
+                            changes.meetingDate.getDate() + 1);
+                }
+            }
+
+            console.log("changes: " + changes);
+            console.log("changes.startTime: " + changes.startTime);
+            console.log("currentSchedule.endTime: " + currentSchedule.endTime);
+            console.log("changes.meetingDate: " + changes.meetingDate);
+            console.log("currentSchedule.meetingDate: " + currentSchedule.meetingDate);
+            // ensure meeting is at least 15 minutes or greater
+            if (changes.startTime && changes.endTime) {
+                if ((changes.startTime.getTime() + (1000 * 60 * 15)) > changes.endTime.getTime()) {
+                    return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
+                }
+            } else {
+                if (changes.startTime) {
+                    if ((changes.startTime.getTime() + (1000 * 60 * 15)) > currentSchedule.endTime.getTime()) {
+                        return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
+                    } else {
+                        if (changes.endTime) {
+                            if ((currentSchedle.startTime.getTime() + (1000 * 60 * 15)) > changes.endTime.getTime()) {
+                                return next("Error: endTime must be greater than or equal to startTime + 15 minutes.");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ensure meeting start time is greater than current time
+            if (changes.startTime) {
+                if ((changes.startTime.getTime()) <= (new Date().getTime())) {
+                    return next(schedule.startTime + " - " + new Date() + " - Error:  Meeting date and time cannot be in the past.");
+                }
+            }
+
+            // check and update meeting location
+            if (req.query.location) { changes.location = req.query.location; }
+
+            Schedule.findOneAndUpdate({ "_id": req.query._id }, changes, { new: true }, function(err, schedule) {})
+                .then(schedule => res.json(schedule + " : Updated."))
+                .catch(err => res.status(422).json(err));
+        })
     },
 
     findAll: function (req, res) {
@@ -196,7 +303,7 @@ module.exports = {
     This helper function does the heavy lifting for the 
     schedule.update request. It returns a result string to 
     be used as the response to the request.
-
+ 
     Any errors result in a "throw" and will be caught
     in the calling function.
     Parameters:
