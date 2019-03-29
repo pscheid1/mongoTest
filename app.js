@@ -64,7 +64,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/members', member);
 app.use('/schedules', schedule);
-// app.use('/meetings', meeting);
+app.use('/meetings', meeting);
 app.use('/facilities', facility);
 
 /*
