@@ -22,3 +22,13 @@ app.post('/profile', upload.array(), function (req, res, next) {
 
 MONGOOSE QUERIES
 https://mongoosejs.com/docs/queries.html
+
+
+If you need full-fledged validation, use the traditional approach of first retrieving the document.
+
+Model.findById(id, function (err, doc) {
+  if (err) ..
+  doc.name = 'jason bourne';
+  doc.save(callback);
+});
+
