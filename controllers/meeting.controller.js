@@ -19,45 +19,73 @@ module.exports = {
             .catch(err => res.status(422).json(err));
     },
 
-update: function (req, res, next) {
+    update: function (req, res, next) {
 
-    let changes = "{ ";
-    var inUse = false;
-    if (req.query.name) {
-        changes +=  ` "meeting.name" : "${req.query.name}" `;
-        inUse = true;
-    }
+        /*
+        No point in doing this until we develop the frontend.  
+        The frontend will have the current record so it can
+        create the startTime and endTime date + time components.
+        */
 
-    if (req.query.street) {
-        if (inUse) {changes += ", "};
-        changes +=  ` "meeting.street" : "${req.query.street}" `;
-        inUse = true;
-    }
+        Meeting.findOne({ '_id': req.query._id }, function (errMsg, meeting) {
+            if (meeting === null) {
+                // userId does not exist
+                return next("Error: _id: " + req.query._id + " does not exist." + errMsg);
+            } else {
+                return next("Not implemented yet.");
+            }
+        });
 
-    if (req.query.town) {
-        if (inUse) {changes += ", "};
-        changes +=  ` "meeting.town" : "${req.query.town}" `;
-        inUse = true;
-    }
-    if (req.query.link) {
-        if (inUse) {changes += ", "};
-        changes +=  ` "meeting.link" : "${req.query.link}" `;
-        inUse = true;
-    }
-    
-    if (inUse){
-        changes += " }";
-    } else {
-        return next(`Error: Meeting.update request for _id = "${req.query._id}" contains no valid field names.`);
-    }
 
-    Meeting.findByIdAndUpdate(
-        { "_id": req.query._id }, 
-        {$set: JSON.parse(changes)},
-        { new: true, runValidators: true }, 
-        function(err, meeting) {})
-        .then(meeting => res.json(meeting + " : Updated."))
-        .catch(err => res.status(422).json(err.message));
+/*         
+        let changes = "{ ";
+        var inUse = false;
+        if (req.query.facility) {
+            changes += ` "facility" : "${req.query.facility}" `;
+            inUse = true;
+        }
+
+        if (req.query.meetingDate) {
+            if (inUse) { changes += ", " };
+            changes += ` "meetingDate" : "${req.query.meetingDate}" `;
+            inUse = true;
+
+            // either update startTime date and time or just date
+            if (req.query.startTime) {
+                if (inUse) { changes += ", " };
+                changes += ` "startTime" : "${req.query.startTime}" `;
+                inUse = true;
+            }
+
+        } else {
+            // process startTime and endTime
+        }
+
+        if (req.query.startTime) {
+            if (inUse) { changes += ", " };
+            changes += ` "startTime" : "${req.query.startTime}" `;
+            inUse = true;
+        }
+        if (req.query.endTime) {
+            if (inUse) { changes += ", " };
+            changes += ` "endTime" : "${req.query.endTime}" `;
+            inUse = true;
+        }
+
+        if (inUse) {
+            changes += " }";
+        } else {
+            return next(`Error: Meeting.update request for _id = "${req.query._id}" contains no valid field names.`);
+        }
+
+        Meeting.findByIdAndUpdate(
+            { "_id": req.query._id },
+            { $set: JSON.parse(changes) },
+            { new: true, runValidators: true },
+            function (err, meeting) { })
+            .then(meeting => res.json(meeting + " : Updated."))
+            .catch(err => res.status(422).json(err.message));
+ */  
     },
 
     // return a list of all meeting entries

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-var names = ["Acton Memorial Library", "Chelmsford Public Library", "Sargent Memorial Library", "Hopkinton Public Lirary"];
+var names = ["Acton Memorial Library", "Chelmsford Public Library", "Sargent Memorial Library", "Hopkinton Public Library"];
 var locations = ["Acton", "Boxborough", "Chelmsford", "Hopkinton"];
 
 let MeetingSchema = new Schema({

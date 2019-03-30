@@ -1,14 +1,13 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-var names = ["Acton Memorial Library", "Chelmsford Public Library", "Sargent Memorial Library", "Hopkinton Public Lirary"];
+var names = ["Acton Memorial Library", "Chelmsford Public Library", "Sargent Memorial Library", "Hopkinton Public Library"];
 var locations = ["Acton", "Boxborough", "Chelmsford", "Hopkinton"];
 
 let FacilitySchema = new Schema({
     _id: {
         type: String,
-        required: true,
-        enum: locations
+        required: true
     },
     facility: {
         name: {
