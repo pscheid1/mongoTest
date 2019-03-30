@@ -6,9 +6,9 @@ var locations = ["Acton", "Boxborough", "Chelmsford", "Hopkinton"];
 
 let MeetingSchema = new Schema({
 
-    _id: { type: String, required: true },
+    _id: { type: String, required: true },          // unique id for his meeting
     facility: {                                     // _id of Facility item
-        type: String,
+        type: String,                               // links meeting to a facility
         required: true,
         enum: locations
     },
@@ -19,7 +19,7 @@ let MeetingSchema = new Schema({
 }, { autoIndex: true });
 
 // if autoIndex is true, mongoose will call sequentially each defined index 
-// to create the indexes manually invoke createIndexes which will call this function.  (see createIndex call in schedule.controller)
+// to create the indexes manually invoke createIndexes which will call this function.  (see createIndex call in meeting.controller)
 MeetingSchema.index({ facility: 1, meetingDate: 1, startTime: 1, endTime: 1 }, { unique: true, name: "dupMeeting" });
 
 MeetingSchema.on('index', function (error) {

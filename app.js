@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const member = require('./routes/member.route');
-const schedule = require('./routes/schedule.route');
 const meeting = require('./routes/meeting.route');
 const facility = require('./routes/facility.route');
 const mongoose = require('mongoose');
@@ -21,7 +20,6 @@ case is significant.
   valid parameters: 
     -p | --port   <port number>
 */
-
 var argvs = require('optimist').argv;
 var index,
   value;
@@ -63,7 +61,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/members', member);
-app.use('/schedules', schedule);
 app.use('/meetings', meeting);
 app.use('/facilities', facility);
 

@@ -36,14 +36,6 @@ let FacilitySchema = new Schema({
     
 }, { autoIndex: false });
 
-// if autoIndex is true, mongoose will call sequentially each defined index 
-// to create the indexes manually invoke createIndexes which will call this function.  (see createIndex call in schedule.controller)
-FacilitySchema.index({ name1: 1, name2: 1, name3: 1 }, { unique: true, name: "index name" });
-
-FacilitySchema.on('index', function (error) {
-    console.log("ScheduleSchema createIndex error: " + error.message);
-});
-
 // Export the model
 
 module.exports = mongoose.model('Facility', FacilitySchema);

@@ -86,3 +86,4 @@ update: function (req, res, next) {
         res.send('globalRoot: ' + global.Root + ' - folders: ' + global.Folders + ' - packageName: ' + global.PackageName + ' - __dirname: ' + __dirname);
     }
 };
+
